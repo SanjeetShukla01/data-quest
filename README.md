@@ -18,8 +18,9 @@ python api_data_to_s3.py
 
 ### Part 3: Data Analytics
 I have created ipynb that calculates following metrics
-1. Finds the best year for every series_id. 
-2. Get value for series_id = PRS30006032 for period = Q01 and the population for that given year. Here I am assuming that if population does not exist then show NaN
+1. Generate the mean and the standard deviation of the annual US population across the years [2013, 2018] inclusive.
+2. Finds the best year for every series_id. 
+3. Get value for series_id = PRS30006032 for period = Q01 and the population for that given year. Here I am assuming that if population does not exist then show NaN
 >![img.png](images/ipynb.png)
 
 Here you can see that population is Nan for records where there is no data in population data set.
