@@ -1,17 +1,45 @@
-# sync_to_s3.py
 import os
+import requests
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 
-# Configuration
-DOWNLOAD_DIR = "bls_data"  # Directory where files are downloaded
-S3_BUCKET = "my-bls-data-bucket"  # Replace with your S3 bucket name
-S3_PREFIX = "bls_data/"  # Optional: Prefix for S3 object keys
+
+BASE_URL = "https://download.bls.gov/pub/time.series/pr/"
+USER_AGENT = "MyApp/1.0 (contact: your-email@example.com)"
+DOWNLOAD_DIR = "bls_data"
+S3_BUCKET = "my-bls-data-bucket"
+S3_PREFIX = "bls_data/"
 s3_client = boto3.client("s3")
 
 
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+
+def get_file_list():
+    headers = {"User-Agent": USER_AGENT}
+    response = requests.get(BASE_URL, headers=headers)
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch file list (Status Code: {response.status_code})")
+
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(response.text, "html.parser")
+    files = [a.text for a in soup.find_all("a") if not a.text.endswith("/")]  # Exclude directories
+    return files[1::]
+
+
+def download_file(url, file_name):
+    headers = {"User-Agent": USER_AGENT}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        with open(os.path.join(DOWNLOAD_DIR, file_name), "wb") as f:
+            f.write(response.content)
+        print(f"Downloaded: {file_name}")
+    else:
+        print(f"Failed to download: {file_name} (Status Code: {response.status_code})")
+
+
+
 def get_s3_files():
-    """Fetch the list of files currently in the S3 bucket."""
     s3_files = set()
     try:
         paginator = s3_client.get_paginator("list_objects_v2")
@@ -27,22 +55,19 @@ def get_s3_files():
 
 
 def upload_file(file_name):
-    """Upload a file to S3 if it doesn't already exist or has been updated."""
     file_path = os.path.join(DOWNLOAD_DIR, file_name)
     s3_key = S3_PREFIX + file_name
 
-    # Check if the file already exists in S3 and compare ETags (MD5 hashes)
     try:
         s3_head = s3_client.head_object(Bucket=S3_BUCKET, Key=s3_key)
         s3_etag = s3_head["ETag"].strip('"')
         local_etag = compute_md5(file_path)
         if s3_etag == local_etag:
             print(f"File is up-to-date in S3: {file_name}")
-            return False  # No need to upload
+            return False
     except ClientError:
-        pass  # File does not exist in S3, proceed to upload
+        pass
 
-    # Upload the file
     try:
         s3_client.upload_file(file_path, S3_BUCKET, s3_key)
         print(f"Uploaded to S3: {file_name}")
@@ -53,7 +78,6 @@ def upload_file(file_name):
 
 
 def delete_file(file_name):
-    """Delete a file from the S3 bucket."""
     s3_key = S3_PREFIX + file_name
     try:
         s3_client.delete_object(Bucket=S3_BUCKET, Key=s3_key)
@@ -63,7 +87,6 @@ def delete_file(file_name):
 
 
 def compute_md5(file_path):
-    """Compute the MD5 hash of a file."""
     import hashlib
     hash_md5 = hashlib.md5()
     with open(file_path, "rb") as f:
@@ -73,6 +96,10 @@ def compute_md5(file_path):
 
 
 def main():
+    files = get_file_list()
+    for file_name in files:
+        file_url = BASE_URL + file_name
+        download_file(file_url, file_name)
     local_files = set(os.listdir(DOWNLOAD_DIR))
     s3_files = get_s3_files()
 
@@ -85,5 +112,5 @@ def main():
         delete_file(file_name)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
