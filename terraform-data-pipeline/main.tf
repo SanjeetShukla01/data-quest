@@ -1,11 +1,16 @@
 provider "aws" {
-  region = "us-east-1"  # Replace with your preferred region
+  region = "eu-north-1"  # Replace with your preferred region
 }
 
 # S3 Bucket for BLS Dataset and Data USA API JSON
 resource "aws_s3_bucket" "data_bucket" {
   bucket = "data-pipeline-bucket"  # Replace with your bucket name
-  acl    = "private"
+}
+
+# Set ACL separately (Fix for deprecated argument)
+resource "aws_s3_bucket_acl" "data_bucket_acl" {
+  bucket = aws_s3_bucket.data_bucket.id
+  acl    = "public-read"
 }
 
 # IAM Role for Lambda Functions
@@ -114,6 +119,18 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
+# Ensure sqs_processor.zip exists before Terraform execution
+resource "null_resource" "ensure_lambda_package" {
+  provisioner "local-exec" {
+    command = <<EOT
+      if [ ! -f "sqs_processor.zip" ]; then
+        echo "Error: sqs_processor.zip not found!" >&2
+        exit 1
+      fi
+    EOT
+  }
+}
+
 # Lambda Function to Process SQS Messages
 resource "aws_lambda_function" "sqs_processor_lambda" {
   function_name = "sqs_processor_lambda"
@@ -123,6 +140,8 @@ resource "aws_lambda_function" "sqs_processor_lambda" {
 
   filename         = "sqs_processor.zip"
   source_code_hash = filebase64sha256("sqs_processor.zip")
+
+  depends_on = [null_resource.ensure_lambda_package]  # Ensures the file exists
 }
 
 # SQS Trigger for Lambda
