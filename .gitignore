@@ -2,3 +2,4 @@ api_data
 bls_data
 .idea
 terraform-data-pipeline/__pycache__/
+terraform-data-pipeline/lambda_function.zip
