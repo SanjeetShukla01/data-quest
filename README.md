@@ -38,14 +38,64 @@ This can be filtered out to show only records where there is population
 
 ### Part 4: Infrastructure as Code & Data Pipeline with AWS CDK
 - Lambda function is here: `lambda_function.py`
-- 
+- SQS Processor: `sqs_processor.py`
 
 
-This part is still in progress. 
-Will add the instructions and information here once I complete this section. 
+In order to create the aws resources using terraform, run following commands
+1. Make sure you have Terraform and AWS cli installed in your machine\
 
 
---
+2. Initialize the Terraform
 
-Till then you can have a look at my practical blog where I setup spark and airflow in docker container. 
-I can automate above pipeline using airflow too. 
+```shell
+cd terraform-data-pipeline
+terraform init
+```
+
+3. Make package of lambda and sql functions. 
+
+```shell
+# install dependency for lambda function
+mkdir lambda_package
+pip install requests boto3 beautifulsoup4 -t lambda_package/
+
+# copy lambda function inside package to be zipped
+cp lambda_function.py lambda_package/
+
+# Zip the contents into a package
+cd lambda_package
+zip -r ../lambda_function.zip .
+cd ..
+
+# Zip the SQS processor
+zip sqs_processor.zip sqs_processor.py
+
+```
+
+4. Validate the terraform steps. 
+
+```shell
+terraform validate
+```
+
+5. Finally apply the terraform to create resources in the cloud
+You may run into issues due to privilege here, so you can give the user appropriate access to pass this step. 
+```shell
+terraform apply
+```
+
+Snapshot of creating resources:
+
+> ![ss_image1.png](images%2Fss_image1.png)
+
+> ![ss_image2.png](images%2Fss_image2.png)
+
+> ![ss_image3.png](images%2Fss_image3.png)
+
+> ![ss_image4.png](images%2Fss_image4.png)
+
+> ![ss_image5.png](images%2Fss_image5.png)
+
+> ![ss_image6.png](images%2Fss_image6.png)
+
+> ![ss_image7.png](images%2Fss_image7.png)
