@@ -1,19 +1,13 @@
 provider "aws" {
-  region = "eu-north-1"  # Replace with your preferred region
+  region = "eu-north-1"
 }
 
-# S3 Bucket for BLS Dataset and Data USA API JSON
+
 resource "aws_s3_bucket" "data_bucket" {
-  bucket = "data-pipeline-bucket"  # Replace with your bucket name
+  bucket = "rearc-pipeline-bucket"
 }
 
-# Set ACL separately (Fix for deprecated argument)
-resource "aws_s3_bucket_acl" "data_bucket_acl" {
-  bucket = aws_s3_bucket.data_bucket.id
-  acl    = "public-read"
-}
 
-# IAM Role for Lambda Functions
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_execution_role"
 
@@ -31,7 +25,6 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# IAM Policy for Lambda Functions
 resource "aws_iam_role_policy" "lambda_policy" {
   role = aws_iam_role.lambda_role.id
 
@@ -73,7 +66,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-# Lambda Function for Part 1 and Part 2
 resource "aws_lambda_function" "data_pipeline_lambda" {
   function_name = "data_pipeline_lambda"
   role          = aws_iam_role.lambda_role.arn
@@ -90,13 +82,12 @@ resource "aws_lambda_function" "data_pipeline_lambda" {
   }
 }
 
-# CloudWatch Event Rule to Trigger Lambda Daily
 resource "aws_cloudwatch_event_rule" "daily_trigger" {
   name                = "daily_trigger"
   schedule_expression = "cron(0 2 * * ? *)"  # Runs daily at 2 AM UTC
 }
 
-# CloudWatch Event Target to Invoke Lambda
+
 resource "aws_cloudwatch_event_target" "invoke_lambda" {
   rule      = aws_cloudwatch_event_rule.daily_trigger.name
   target_id = "lambda_target"
@@ -119,7 +110,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-# Ensure sqs_processor.zip exists before Terraform execution
 resource "null_resource" "ensure_lambda_package" {
   provisioner "local-exec" {
     command = <<EOT
@@ -131,7 +121,6 @@ resource "null_resource" "ensure_lambda_package" {
   }
 }
 
-# Lambda Function to Process SQS Messages
 resource "aws_lambda_function" "sqs_processor_lambda" {
   function_name = "sqs_processor_lambda"
   role          = aws_iam_role.lambda_role.arn
@@ -144,7 +133,6 @@ resource "aws_lambda_function" "sqs_processor_lambda" {
   depends_on = [null_resource.ensure_lambda_package]  # Ensures the file exists
 }
 
-# SQS Trigger for Lambda
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   event_source_arn = aws_sqs_queue.data_queue.arn
   function_name    = aws_lambda_function.sqs_processor_lambda.arn

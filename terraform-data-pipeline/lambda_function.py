@@ -12,7 +12,7 @@ BLS_USER_AGENT = "SanjeetShukal/1.0 (contact: sanjeets1900@gmail.com)"
 BLS_DOWNLOAD_DIR = "/tmp/bls_data"  # Using /tmp for Lambda
 DATAUSA_API_URL = "https://datausa.io/api/data?drilldowns=Nation&measures=Population"
 DATAUSA_DOWNLOAD_DIR = "/tmp/api_data"
-S3_BUCKET = "data-pipeline-bucket"
+S3_BUCKET = "rearc-pipeline-bucket"
 BLS_S3_PREFIX = "bls_data/"
 DATAUSA_S3_PREFIX = "datausa_api/"
 
