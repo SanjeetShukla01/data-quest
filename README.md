@@ -5,6 +5,23 @@ Run below python file to download timeseries data and upload it to s3 bucket.
 ```shell
 python bls_data_upload_to_s3.py
 ```
+
+Link of Data in S3:
+
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.class
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.contacts
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.data.0.Current
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.data.1.AllData
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.duration
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.footnote
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.measure
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.period
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.seasonal
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.sector
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.series
+- https://my-bls-data-bucket.s3.eu-north-1.amazonaws.com/bls_data/pr.txt
+
+
 > ![img.png](images/s3_ss.png)
 
 ### Part 2: APIs
