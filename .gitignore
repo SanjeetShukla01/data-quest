@@ -3,3 +3,7 @@ bls_data
 .idea
 terraform-data-pipeline/__pycache__/
 terraform-data-pipeline/lambda_function.zip
+terraform-data-pipeline/.terraform.lock.hcl
+terraform-data-pipeline/.terraform
+terraform-data-pipeline/lambda_package
+#terraform-data-pipeline/sqs_processor.zip

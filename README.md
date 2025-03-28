@@ -37,6 +37,10 @@ This can be filtered out to show only records where there is population
 
 
 ### Part 4: Infrastructure as Code & Data Pipeline with AWS CDK
+- Lambda function is here: `lambda_function.py`
+- 
+
+
 This part is still in progress. 
 Will add the instructions and information here once I complete this section. 
 
